@@ -20,16 +20,6 @@ docker-compose --version
 
 ## Start in development mode
 
-In the project directory run the command (you might
-need to prepend it with `sudo` depending on your setup):
-```sh
-docker-compose -f docker-compose-dev.yml up
-```
-
-This starts a local PostgreSQL database on `localhost:5432`.
-The database will be populated with test records from the
-[init-db.sql](init-db.sql) file.
-
 Navigate to the `server` folder and start the back end:
 
 ```sh
@@ -47,7 +37,7 @@ npm install
 npm start
 ```
 The application will be available on http://localhost:3000.
- 
+
 ## Start in production mode
 
 Perform:
