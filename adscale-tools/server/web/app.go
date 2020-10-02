@@ -1,8 +1,8 @@
 package web
 
 import (
-	"adscale-tools/model"
-	"encoding/json"
+	"adscale-tools/web/handlers"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -11,50 +11,16 @@ type App struct {
 	handlers map[string]http.HandlerFunc
 }
 
-func NewApp(cors bool) App {
-	app := App{
-		handlers: make(map[string]http.HandlerFunc),
+func NewApp(disableCors bool) App {
+	return App{
+		handlers: handlers.GetHandlers("api", disableCors),
 	}
-	techHandler := app.GetTechnologies
-	if !cors {
-		techHandler = disableCors(techHandler)
-	}
-	app.handlers["/api/technologies"] = techHandler
-	app.handlers["/"] = http.FileServer(http.Dir("/webapp")).ServeHTTP
-	return app
 }
 
-func (a *App) Serve() error {
+func (a *App) Serve(port string) error {
 	for path, handler := range a.handlers {
 		http.Handle(path, handler)
 	}
-	log.Println("Web server is available on port 8080")
-	return http.ListenAndServe(":8080", nil)
-}
-
-func (a *App) GetTechnologies(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	technologies := []model.Technology{
-		{"Tech1", "Details1"},
-		{"Tech2", "Details2"},
-	}
-	err := json.NewEncoder(w).Encode(technologies)
-	if err != nil {
-		sendErr(w, http.StatusInternalServerError, err.Error())
-	}
-}
-
-func sendErr(w http.ResponseWriter, code int, message string) {
-	resp, _ := json.Marshal(map[string]string{"error": message})
-	http.Error(w, string(resp), code)
-}
-
-// Needed in order to disable CORS for local development
-func disableCors(h http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "*")
-		h(w, r)
-	}
+	log.Printf("Web server is available on port %s\n", port)
+	return http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
 }
