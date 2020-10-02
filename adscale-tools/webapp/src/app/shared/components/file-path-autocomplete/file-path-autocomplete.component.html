@@ -1,0 +1,16 @@
+<form autocomplete="off"
+      novalidate
+      [formGroup]="form">
+
+  <input matInput
+         [placeholder]="placeholder"
+         formControlName="path"
+         [matAutocomplete]="auto">
+
+  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onSelect($event.option.value)">
+    <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+      {{option}}
+    </mat-option>
+  </mat-autocomplete>
+
+</form>

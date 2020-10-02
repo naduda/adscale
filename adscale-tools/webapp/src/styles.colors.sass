@@ -1,0 +1,13 @@
+$types: success, danger, warn, info, secondary, primary
+
+:root
+  --success: #6eaf50
+  --danger: #F83A35
+  --warn: #e89c30
+  --info: #37aeec
+  --secondary:#979797
+  --primary: #3247A7
+
+@each $type in $types
+  .t_#{$type}
+    color: var(--#{$type})

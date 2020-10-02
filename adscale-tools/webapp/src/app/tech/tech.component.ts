@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { TechService } from './tech.service';
 import { Technology } from './tech.model';
+import { TechService } from './tech.service';
 
 @Component({
-  selector: 'app-tech',
+  selector: 'adscale-tech',
   templateUrl: './tech.component.html'
 })
 export class TechComponent implements OnInit {

@@ -1,0 +1,34 @@
+<form autocomplete="off"
+      novalidate
+      [formGroup]="form"
+      (ngSubmit)="submit()">
+
+  <main>
+    <mat-form-field appearance="outline">
+      <mat-label>Path to easyleads.conf</mat-label>
+
+      <adscale-file-path-autocomplete placeholder="easyleads.conf"
+                                      formControlName="easyleads">
+      </adscale-file-path-autocomplete>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Path to backend folder</mat-label>
+
+      <adscale-file-path-autocomplete placeholder="Backend Folder"
+                                      formControlName="repo">
+      </adscale-file-path-autocomplete>
+    </mat-form-field>
+  </main>
+
+  <footer class="flex-center">
+    <small class="t_danger" [innerHTML]="errMessage"></small>
+
+    <button mat-raised-button
+            color="primary"
+            [disabled]="form.invalid">
+      Apply
+    </button>
+  </footer>
+
+</form>
