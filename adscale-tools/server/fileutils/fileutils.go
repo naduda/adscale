@@ -3,7 +3,7 @@ package fileutils
 import (
 	"encoding/json"
 	"io/ioutil"
-	"strings"
+	"os"
 )
 
 func GetStructFromJsonFile(data interface{}, filename string) error {
@@ -22,20 +22,9 @@ func SaveStructToJsonFile(data interface{}, filename string) error {
 	}
 }
 
-func ChangeLineInFileByNumber(filename string, linenumber int, content string) error {
-	input, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return err
+func MakeDirIfNotExist(name string) error {
+	if _, err := os.Stat(name); os.IsNotExist(err) {
+		return os.Mkdir(name, os.ModePerm)
 	}
-
-	lines := strings.Split(string(input), "\n")
-
-	for i, _ := range lines {
-		if i == linenumber {
-			lines[i] = content
-		}
-	}
-
-	output := strings.Join(lines, "\n")
-	return ioutil.WriteFile(filename, []byte(output), 0644)
+	return nil
 }

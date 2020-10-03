@@ -14,6 +14,7 @@ func GetHandlers(api string, disable bool) map[string]http.HandlerFunc {
 	handlers[fmt.Sprintf("/%s/file-path-autocomplete", api)] = filePathAutocompleteHandleFunc
 	handlers[fmt.Sprintf("/%s/properties", api)] = easyleadsPropertiesFunc
 	handlers[fmt.Sprintf("/%s/technologies", api)] = getTechnologies
+	handlers[fmt.Sprintf("/%s/prepare-docker-files", api)] = prepareDockerFiles
 
 	if disable {
 		for k, hf := range handlers {
