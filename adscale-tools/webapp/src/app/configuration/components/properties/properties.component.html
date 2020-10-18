@@ -63,19 +63,18 @@
       <ng-container matColumnDef="ico">
         <th mat-header-cell mat-sort-header *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element; let idx = index;" [formGroupName]="idx">
-          <ng-container *ngIf="!element.status; else toggleTmpl">
-            <span class="t_danger material-icons"
+          <div class="action">
+            <span *ngIf="!element.status"
+                  class="t_danger material-icons"
                   (click)="delete(idx, element.line)">
               delete
             </span>
-          </ng-container>
 
-          <ng-template #toggleTmpl>
             <mat-slide-toggle formControlName="enabled"
                               color="primary"
                               [checked]="!element.enabled">
             </mat-slide-toggle>
-          </ng-template>
+          </div>
         </td>
       </ng-container>
 

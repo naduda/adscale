@@ -50,7 +50,21 @@ export class ConfigService {
       }
     });
 
-    return res.sort((a, b) => a.name.localeCompare(b.name));
+    return res.sort((a, b) => {
+      if (a.status && !b.status) {
+        return -1;
+      }
+      if (!a.status && b.status) {
+        return 1;
+      }
+      if (a.enabled && !b.enabled) {
+        return -1;
+      }
+      if (!a.enabled && b.enabled) {
+        return 1;
+      }
+      return a.name.localeCompare(b.name);
+    });
   }
 
   saveProperties(data): Observable<void> {
