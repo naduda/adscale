@@ -2,9 +2,12 @@ import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { finalize } from 'rxjs/operators';
+import { filter, finalize, switchMap, tap } from 'rxjs/operators';
+import { DockerService } from 'src/app/docker/services/docker.service';
+import { SharedDialogService } from 'src/app/shared/dialog/dialog.service';
 import { ConfigService } from '../../services/congig.service';
 import { IConfigurationProperty } from '../model/interfaces';
+import { AddPropertyDialogComponent } from './add-property-dialog/add-property-dialog.component';
 
 @Component({
   selector: 'adscale-properties',
@@ -16,12 +19,15 @@ export class PropertiesComponent implements OnInit, AfterViewInit {
   @ViewChild(MatSort) sort: MatSort;
 
   loading: boolean;
+  containerExists: boolean;
   form: FormGroup;
-  displayedColumns: string[] = ['name', 'value'];
+  displayedColumns: string[] = ['idx', 'ico', 'name', 'value'];
   dataSource = new MatTableDataSource<IConfigurationProperty>();
 
   constructor(
     private configService: ConfigService,
+    private dockerService: DockerService,
+    private dialogService: SharedDialogService,
     private fb: FormBuilder,
   ) {
     this.form = fb.group({
@@ -38,7 +44,10 @@ export class PropertiesComponent implements OnInit, AfterViewInit {
       .subscribe(e => {
         e.forEach(z => this.addRow(z));
         this.dataSource.data = e;
+        this.dataSource._updateChangeSubscription();
       });
+
+    this.dockerService.state$.subscribe(e => this.containerExists = e.containerExists);
   }
 
   ngAfterViewInit() {
@@ -48,6 +57,50 @@ export class PropertiesComponent implements OnInit, AfterViewInit {
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+  addProperty() {
+    this.dialogService.openDialog(AddPropertyDialogComponent, null)
+      .afterClosed()
+      .pipe(
+        filter(e => !!e),
+        tap(_ => this.loading = true),
+        switchMap(e => this.configService.addProperty(e).pipe(finalize(() => this.loading = false))),
+      )
+      .subscribe(e => {
+        this.rowsControl.clear();
+        e.forEach(z => this.addRow(z));
+        this.dataSource.data = e;
+        this.dataSource._updateChangeSubscription();
+      });
+  }
+
+  delete(idx: number, line: number) {
+    const data = {
+      title: 'Are you sure?',
+      desc: 'You want to delete current property',
+    };
+
+    this.dialogService.openConfirm(data)
+      .pipe(
+        filter(Boolean),
+        tap(_ => this.loading = true),
+        switchMap(_ => this.configService.removeLine(line).pipe(finalize(() => this.loading = false))),
+      )
+      .subscribe(_ => {
+        this.dataSource.data.splice(idx, 1);
+        this.dataSource._updateChangeSubscription();
+      });
+  }
+
+  removeExtraLines() {
+    this.loading = true;
+    this.configService.removeExtraLines()
+      .pipe(finalize(() => this.loading = false))
+      .subscribe(e => {
+        this.dataSource.data = e;
+        this.dataSource._updateChangeSubscription();
+      });
   }
 
   submit() {
@@ -62,12 +115,22 @@ export class PropertiesComponent implements OnInit, AfterViewInit {
         data[r.name] = {
           line: r.line,
           value: r.type === 'boolean' ? r.value ? 'true' : 'false' : r.value,
+          enabled: r.enabled,
         };
       }
     }
 
     this.loading = true;
     this.configService.saveProperties(data)
+      .pipe(
+        finalize(() => this.loading = false),
+      )
+      .subscribe();
+  }
+
+  copyToContainer() {
+    this.loading = true;
+    this.configService.copyToContainer()
       .pipe(
         finalize(() => this.loading = false),
       )
@@ -84,6 +147,7 @@ export class PropertiesComponent implements OnInit, AfterViewInit {
       value: [s.value],
       line: [s.line],
       status: [s.status],
+      enabled: [s.enabled],
       type: [s.type],
     });
 

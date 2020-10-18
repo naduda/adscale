@@ -13,5 +13,6 @@ export interface IConfigurationProperty {
   name: string;
   value: string | boolean;
   status: boolean;
+  enabled: boolean;
   type: string;
 }

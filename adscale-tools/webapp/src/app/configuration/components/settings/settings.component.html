@@ -19,6 +19,35 @@
                                       formControlName="repo">
       </adscale-file-path-autocomplete>
     </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Path to UI folder</mat-label>
+
+      <adscale-file-path-autocomplete placeholder="Angular Folder"
+                                      formControlName="ui">
+      </adscale-file-path-autocomplete>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>DB IP</mat-label>
+
+      <input matInput
+             type="text"
+             placeholder="Set your DB IP"
+             formControlName="dbIP"
+             mask="099.099.099.099"
+             [dropSpecialCharacters]="false">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>App Port</mat-label>
+
+      <input matInput
+             type="text"
+             placeholder="Set application Port"
+             formControlName="appPort"
+             mask="0999">
+    </mat-form-field>
   </main>
 
   <footer class="flex-center">

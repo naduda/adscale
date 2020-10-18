@@ -7,17 +7,44 @@
   <h1>Properties</h1>
 
   <header class="flex-center">
-    <mat-form-field>
-      <mat-label>Filter</mat-label>
-      <input matInput (keyup)="applyFilter($event)" placeholder="Ex. ium" #input>
-    </mat-form-field>
+    <div>
+      <mat-form-field>
+        <mat-label>Filter</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Ex. ium" #input>
+      </mat-form-field>
 
-    <button mat-raised-button
-            color="primary"
-            type="submit"
-            [disabled]="form.invalid">
-      Apply
-    </button>
+      <button mat-raised-button
+              color="primary"
+              type="button"
+              (click)="addProperty()">
+        <span class="material-icons"> add </span>
+        <span class="plus">Add New Property</span>
+      </button>
+    </div>
+
+    <div>
+      <button *ngIf="containerExists"
+              mat-raised-button
+              color="primary"
+              type="button"
+              (click)="copyToContainer()">
+        Copy into Container
+      </button>
+
+      <button mat-raised-button
+              color="primary"
+              type="button"
+              (click)="removeExtraLines()">
+        Remove Empty Extra Lines
+      </button>
+
+      <button mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="form.invalid">
+        Apply
+      </button>
+    </div>
   </header>
 
   <div class="table-container">
@@ -25,6 +52,32 @@
            matSort
            formArrayName="rows"
            [dataSource]="dataSource">
+
+      <ng-container matColumnDef="idx">
+        <th mat-header-cell mat-sort-header *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let idx = index;">
+          {{ idx + 1 }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="ico">
+        <th mat-header-cell mat-sort-header *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let element; let idx = index;" [formGroupName]="idx">
+          <ng-container *ngIf="!element.status; else toggleTmpl">
+            <span class="t_danger material-icons"
+                  (click)="delete(idx, element.line)">
+              delete
+            </span>
+          </ng-container>
+
+          <ng-template #toggleTmpl>
+            <mat-slide-toggle formControlName="enabled"
+                              color="primary"
+                              [checked]="!element.enabled">
+            </mat-slide-toggle>
+          </ng-template>
+        </td>
+      </ng-container>
 
       <ng-container matColumnDef="name">
         <th mat-header-cell mat-sort-header *matHeaderCellDef> Name </th>

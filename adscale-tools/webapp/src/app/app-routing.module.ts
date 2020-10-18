@@ -7,6 +7,7 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: 'config', pathMatch: 'full' },
       { path: 'config', loadChildren: () => import('./configuration/configuration.module').then(m => m.ConfigurationModule) },
+      { path: 'docker', loadChildren: () => import('./docker/docker.module').then(m => m.DockerModule) },
     ],
   }
 ];

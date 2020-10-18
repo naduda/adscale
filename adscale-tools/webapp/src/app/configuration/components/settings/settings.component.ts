@@ -27,6 +27,9 @@ export class SettingsComponent implements OnInit {
     this.form = fb.group({
       easyleads: [null, Validators.required],
       repo: [null, Validators.required],
+      ui: [null, Validators.required],
+      dbIP: [null, Validators.required],
+      appPort: [null, Validators.required],
     });
   }
 

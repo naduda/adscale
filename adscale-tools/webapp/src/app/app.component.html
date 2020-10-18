@@ -1,5 +1,11 @@
-<div class="app">
-  <adscale-tech></adscale-tech>
-</div>
+<adscale-navigation>
+  <ng-container class="nav-items">
+    <a mat-list-item href="#" routerLink="/config/settings">Settings</a>
+    <a mat-list-item href="#" routerLink="/config/properties">Properties</a>
+    <a mat-list-item href="#" routerLink="/docker">Docker</a>
+  </ng-container>
 
-<router-outlet></router-outlet>
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</adscale-navigation>

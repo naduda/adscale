@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { IConfigurationProperty, ISettings } from '../components/model/interfaces';
 
@@ -9,6 +9,8 @@ import { IConfigurationProperty, ISettings } from '../components/model/interface
   providedIn: 'root'
 })
 export class ConfigService {
+
+  props$: Observable<IConfigurationProperty[]>;
 
   constructor(private http: HttpClient) { }
 
@@ -24,26 +26,59 @@ export class ConfigService {
     return this.http.post<void>(`${environment.apiPreffix}/settings`, data);
   }
 
-  getProperties(): Observable<IConfigurationProperty[]> {
-    return this.http.get<any>(`${environment.apiPreffix}/properties`)
-      .pipe(
-        map(e => {
-          const res: IConfigurationProperty[] = [];
-          Object.keys(e).forEach(k => {
-            const v: IConfigurationProperty = e[k];
-            const strVal = v.value as string;
-            if (strVal.toLowerCase() === 'true' || strVal.toLowerCase() === 'false') {
-              v.type = 'boolean';
-              v.value = strVal.toLowerCase() === 'true';
-            }
-            res.push({ ...v, name: k });
-          });
-          return res.sort((a, b) => a.name.localeCompare(b.name));
-        }),
-      );
+  getProperties(forse = false): Observable<IConfigurationProperty[]> {
+    if (!this.props$ || forse) {
+      this.props$ = this.http.get<any>(`${environment.apiPreffix}/properties`)
+        .pipe(
+          map(e => this.mapProperties(e)),
+          shareReplay(1),
+        );
+    }
+
+    return this.props$;
+  }
+
+  private mapProperties(originalList: any): IConfigurationProperty[] {
+    const res = Object.entries(originalList)
+      .map((e: any[]) => ({ ...e[1], name: e[0] }));
+
+    res.forEach(v => {
+      const strVal = v.value as string;
+      if (strVal.toLowerCase() === 'true' || strVal.toLowerCase() === 'false') {
+        v.type = 'boolean';
+        v.value = strVal.toLowerCase() === 'true';
+      }
+    });
+
+    return res.sort((a, b) => a.name.localeCompare(b.name));
   }
 
   saveProperties(data): Observable<void> {
-    return this.http.post<void>(`${environment.apiPreffix}/properties`, data);
+    return this.http.post<void>(`${environment.apiPreffix}/properties`, data)
+      .pipe(
+        tap(_ => this.props$ = null),
+      );
+  }
+
+  addProperty(property: { name: string, value: string }): Observable<IConfigurationProperty[]> {
+    return this.http.post<void>(`${environment.apiPreffix}/add-property`, property)
+      .pipe(
+        switchMap(_ => this.getProperties(true)),
+      );
+  }
+
+  removeLine(line: number): Observable<void> {
+    return this.http.post<void>(`${environment.apiPreffix}/remove-property`, { line });
+  }
+
+  removeExtraLines(): Observable<IConfigurationProperty[]> {
+    return this.http.post<any>(`${environment.apiPreffix}/remove-extra-empty-lines`, null)
+      .pipe(
+        map(e => this.mapProperties(e)),
+      );
+  }
+
+  copyToContainer(): Observable<void> {
+    return this.http.post<void>(`${environment.apiPreffix}/copy-properties-to-container`, null);
   }
 }

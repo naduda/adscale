@@ -6,8 +6,10 @@ $types: success, danger, warn, info, secondary, primary
   --warn: #e89c30
   --info: #37aeec
   --secondary:#979797
-  --primary: #3247A7
+  --primary: #673ab7
 
 @each $type in $types
   .t_#{$type}
     color: var(--#{$type})
+  .bg_#{$type}
+    background-color: var(--#{$type})
