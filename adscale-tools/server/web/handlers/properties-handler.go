@@ -28,7 +28,7 @@ func (h *Handlers) easyleadsPropertiesFunc(w http.ResponseWriter, r *http.Reques
 	if r.Method == http.MethodPost {
 		var properties map[string]config.ConfigurationProperty
 		if err = json.NewDecoder(r.Body).Decode(&properties); err == nil {
-			err = changeProperties(properties)
+			err = h.changeProperties(properties)
 		}
 	}
 
@@ -97,11 +97,11 @@ func (h *Handlers) removeExtraEmptyLinesFunc(w http.ResponseWriter, _ *http.Requ
 	}
 }
 
-func copyPropertiesToContainerFunc(w http.ResponseWriter, _ *http.Request) {
+func (h *Handlers) copyPropertiesToContainerFunc(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var err error
-	if err = docker.PrepareEasyleadsConf(); err == nil {
+	if err = docker.PrepareEasyleadsConf(h.Settings); err == nil {
 		cmd := fmt.Sprintf("docker cp ./%s %s:/adscale/configuration/easyleads.conf",
 			model.DockerEasyleadsConf, model.DockerContainerName)
 		err = docker.RunCommand(cmd, "./")
@@ -112,13 +112,8 @@ func copyPropertiesToContainerFunc(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func changeProperties(properties map[string]config.ConfigurationProperty) error {
-	var settings model.Settings
-	if err := fileutils.GetStructFromJsonFile(&settings, model.SettingsFilePath); err != nil {
-		return err
-	}
-
-	input, err := ioutil.ReadFile(settings.Easyleads)
+func (h *Handlers) changeProperties(properties map[string]config.ConfigurationProperty) error {
+	input, err := ioutil.ReadFile(h.Settings.Easyleads)
 	if err != nil {
 		return err
 	}
@@ -138,7 +133,7 @@ func changeProperties(properties map[string]config.ConfigurationProperty) error 
 	}
 
 	output := strings.Join(lines, "\n")
-	return ioutil.WriteFile(settings.Easyleads, []byte(output), 0644)
+	return ioutil.WriteFile(h.Settings.Easyleads, []byte(output), 0644)
 }
 
 func getProperties(settings model.Settings) (map[string]*config.ConfigurationProperty, error) {

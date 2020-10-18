@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 type App struct {
@@ -16,7 +17,11 @@ type App struct {
 func NewApp(disableCors bool) App {
 	var settings model.Settings
 	if err := settings.Read(); err != nil {
-		panic(err)
+		if os.IsNotExist(err) {
+			fmt.Println("Settings not exists...")
+		} else {
+			panic(err)
+		}
 	}
 
 	var d docker.AdscaleContainer

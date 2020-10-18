@@ -9,13 +9,8 @@ import (
 	"strings"
 )
 
-func PrepareEasyleadsConf() error {
+func PrepareEasyleadsConf(s model.Settings) error {
 	if err := fileutils.MakeDirIfNotExist("./" + model.DockerFolderConfig); err != nil {
-		return err
-	}
-
-	var s model.Settings
-	if err := fileutils.GetStructFromJsonFile(&s, model.SettingsFilePath); err != nil {
 		return err
 	}
 

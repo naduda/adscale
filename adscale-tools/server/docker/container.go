@@ -53,7 +53,7 @@ func (c *AdscaleContainer) Init() error {
 	return nil
 }
 
-func (c *AdscaleContainer) CreateImage() error {
+func (c *AdscaleContainer) CreateImage(s model.Settings) error {
 	if c.State.ImageExists {
 		return nil
 	}
@@ -62,7 +62,7 @@ func (c *AdscaleContainer) CreateImage() error {
 		return err
 	}
 
-	if err := PrepareEasyleadsConf(); err != nil {
+	if err := PrepareEasyleadsConf(s); err != nil {
 		return err
 	}
 
@@ -203,12 +203,7 @@ func findConnectionUrl(filename string) (string, error) {
 	return res, nil
 }
 
-func CreateWar(mod3 bool, cbfsms bool) error {
-	var s model.Settings
-	if err := fileutils.GetStructFromJsonFile(&s, model.SettingsFilePath); err != nil {
-		return err
-	}
-
+func CreateWar(mod3 bool, cbfsms bool, s model.Settings) error {
 	contextXML := s.Repo + "/ui/WebContent/META-INF/context.xml"
 	url, err := findConnectionUrl(contextXML)
 	if err != nil {

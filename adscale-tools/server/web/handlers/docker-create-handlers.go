@@ -17,7 +17,7 @@ func (h *Handlers) createRemoveImageFunc(w http.ResponseWriter, r *http.Request)
 	var err error
 
 	if m["status"] {
-		if err = h.Docker.CreateImage(); err == nil {
+		if err = h.Docker.CreateImage(h.Settings); err == nil {
 			err = h.Docker.CreateAndRunContainer(h.Settings.AppPort)
 		}
 	} else {

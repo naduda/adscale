@@ -6,7 +6,6 @@ import (
 )
 
 const settingsFilePath = "./settings.json"
-const SettingsFilePath = "./settings.json"
 
 type Settings struct {
 	Easyleads string `json:"easyleads"`

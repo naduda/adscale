@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func buildWarFunc(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) buildWarFunc(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var m map[string]bool
@@ -17,7 +17,7 @@ func buildWarFunc(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := docker.CreateWar(m["installModule"], m["installCbfsms"]); err != nil {
+	if err := docker.CreateWar(m["installModule"], m["installCbfsms"], h.Settings); err != nil {
 		sendErr(w, http.StatusInternalServerError, err.Error())
 	}
 }

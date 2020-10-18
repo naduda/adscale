@@ -15,7 +15,7 @@ type Handlers struct {
 
 func (h *Handlers) GetHandlers(api string, disable bool) map[string]http.HandlerFunc {
 	handlers := map[string]http.HandlerFunc{
-		"/": http.FileServer(http.Dir("/webapp")).ServeHTTP,
+		"/": http.FileServer(http.Dir("./webapp")).ServeHTTP,
 	}
 
 	handlers[fmt.Sprintf("/%s/file-path-autocomplete", api)] = filePathAutocompleteHandleFunc
@@ -23,13 +23,13 @@ func (h *Handlers) GetHandlers(api string, disable bool) map[string]http.Handler
 	handlers[fmt.Sprintf("/%s/properties", api)] = h.easyleadsPropertiesFunc
 	handlers[fmt.Sprintf("/%s/add-property", api)] = h.addPropertyFunc
 	handlers[fmt.Sprintf("/%s/remove-property", api)] = h.removePropertyFunc
-	handlers[fmt.Sprintf("/%s/copy-properties-to-container", api)] = copyPropertiesToContainerFunc
+	handlers[fmt.Sprintf("/%s/copy-properties-to-container", api)] = h.copyPropertiesToContainerFunc
 	handlers[fmt.Sprintf("/%s/remove-extra-empty-lines", api)] = h.removeExtraEmptyLinesFunc
 	handlers[fmt.Sprintf("/%s/docker-state", api)] = h.dockerStateFunc
 	handlers[fmt.Sprintf("/%s/toggle-container", api)] = h.toggleContainerFunc
 	handlers[fmt.Sprintf("/%s/create-remove-container", api)] = h.createRemoveContainerFunc
 	handlers[fmt.Sprintf("/%s/create-remove-image", api)] = h.createRemoveImageFunc
-	handlers[fmt.Sprintf("/%s/build-war", api)] = buildWarFunc
+	handlers[fmt.Sprintf("/%s/build-war", api)] = h.buildWarFunc
 	handlers[fmt.Sprintf("/%s/update-frontend", api)] = h.updateFrontendFunc
 
 	if disable {
