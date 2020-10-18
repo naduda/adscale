@@ -14,13 +14,15 @@ func PrepareEasyleadsConf(s model.Settings) error {
 		return err
 	}
 
-	var config config.Config
-	if err := config.Init(s.Easyleads); err != nil {
+	var conf config.Config
+	if err := conf.Init(s.Easyleads); err != nil {
 		return err
 	}
 
-	if err := os.Remove(model.DockerEasyleadsConf); err != nil {
-		return err
+	if _, err := os.Stat(model.DockerEasyleadsConf); err == nil {
+		if err := os.Remove(model.DockerEasyleadsConf); err != nil {
+			return err
+		}
 	}
 
 	file, err := os.OpenFile(model.DockerEasyleadsConf, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
@@ -29,7 +31,7 @@ func PrepareEasyleadsConf(s model.Settings) error {
 	}
 	defer file.Close()
 
-	for k, v := range config.Props {
+	for k, v := range conf.Props {
 		if isPath(v.Value) {
 			if _, err := file.WriteString(fmt.Sprintf("%s=%s/%s\n", k, model.DockerDataFolder, k)); err != nil {
 				return err

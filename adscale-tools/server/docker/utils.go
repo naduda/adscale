@@ -4,11 +4,18 @@ import (
 	"bufio"
 	"fmt"
 	"os/exec"
+	"runtime"
 )
 
 func executeCommand(command string) (string, error) {
-	//out, err := exec.Command("/bin/sh", "-c", "docker ps --format \"{{.Names}}\"").Output()
-	out, err := exec.Command("/bin/sh", "-c", command).Output()
+	name := "/bin/sh"
+	arg := "-c"
+	if runtime.GOOS == "windows" {
+		name = "cmd"
+		arg = "/C"
+	}
+
+	out, err := exec.Command(name, arg, command).Output()
 	if err != nil {
 		return "", err
 	}
@@ -17,7 +24,13 @@ func executeCommand(command string) (string, error) {
 }
 
 func RunCommand(command string, dir string) error {
-	cmd := exec.Command("/bin/sh", "-c", command)
+	name := "/bin/sh"
+	arg := "-c"
+	if runtime.GOOS == "windows" {
+		name = "cmd"
+		arg = "/C"
+	}
+	cmd := exec.Command(name, arg, command)
 	cmd.Dir = dir
 
 	stdout, err := cmd.StdoutPipe()

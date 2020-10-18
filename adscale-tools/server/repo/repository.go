@@ -75,13 +75,12 @@ func (r *Repository) setPropertyAlternatives() error {
 	return nil
 }
 
-func checkFile(filename string, c *config.Config, alternatives map[string]string) {
+func checkFile(filepath string, c *config.Config, alternatives map[string]string) {
 	if c.IsChecked() {
 		return
 	}
 
-	c.Filename = filename
-	file, err := os.Open(c.Filename)
+	file, err := os.Open(filepath)
 	if err != nil {
 		return
 	}
@@ -89,18 +88,27 @@ func checkFile(filename string, c *config.Config, alternatives map[string]string
 
 	importBlock := true
 	hasProperties := false
-	fname := filename[strings.LastIndex(filename, "/")+1 : len(filename)-5]
+	fname := filepath[strings.LastIndex(filepath, "/")+1 : len(filepath)-5]
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		t := scanner.Text()
+
+		commented := strings.HasPrefix(strings.TrimSpace(t), "//")
+		if commented {
+			continue
+		}
+
 		if importBlock {
-			if strings.Contains(t, "package com.adscale.core;") {
-				hasProperties = true
-				continue
+			if !hasProperties {
+				if strings.Contains(t, "package com.adscale.core;") {
+					hasProperties = true
+					continue
+				}
 			}
-			if strings.Contains(t, "class") && strings.Contains(t, fname) {
+			if strings.Contains(t, "class ") && strings.Contains(t, fname) {
 				importBlock = false
+				continue
 			}
 			if hasProperties {
 				continue
@@ -119,10 +127,7 @@ func checkFile(filename string, c *config.Config, alternatives map[string]string
 			if v.Status {
 				continue
 			}
-			commented := strings.HasPrefix(strings.TrimSpace(t), "//")
-			if commented {
-				continue
-			}
+
 			if strings.Contains(t, fmt.Sprintf("\"%s\"", k)) {
 				v.Status = true
 				c.CheckedLength++
@@ -135,7 +140,6 @@ func checkFile(filename string, c *config.Config, alternatives map[string]string
 			if strings.Contains(t, fmt.Sprintf("ApplicationConfiguration.%s", alternative)) {
 				v.Status = true
 				c.CheckedLength++
-				break
 			}
 		}
 	}
