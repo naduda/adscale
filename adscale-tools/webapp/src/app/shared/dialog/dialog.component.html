@@ -1,0 +1,26 @@
+<form autocomplete="off"
+      novalidate
+      [formGroup]="form">
+
+  <header class="flex-center justify-content-between bg_primary">
+    <h6 [class]="headerClass" [innerHTML]="title"></h6>
+    <span *ngIf="closable" class="material-icons pointer" (click)="ref.close()">
+      close
+    </span>
+  </header>
+
+  <main>
+    <ng-content select="[dialogBody]"></ng-content>
+  </main>
+
+  <footer [class]="footerClass">
+    <ng-content select="[dialogFooter]"></ng-content>
+
+    <button mat-raised-button
+            color="primary"
+            [innerHTML]="submitText"
+            (click)="submit()">
+    </button>
+  </footer>
+
+</form>

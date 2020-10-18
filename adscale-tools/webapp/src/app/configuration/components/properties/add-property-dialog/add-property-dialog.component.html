@@ -1,0 +1,16 @@
+<adscale-dialog [form]="form"
+                title="Add New Property">
+
+  <ng-container dialogBody>
+    <mat-form-field>
+      <mat-label>Name</mat-label>
+      <input matInput placeholder="Property name" [formControl]="nameControl">
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Value</mat-label>
+      <input matInput placeholder="Property value" [formControl]="valueControl">
+    </mat-form-field>
+  </ng-container>
+
+</adscale-dialog>

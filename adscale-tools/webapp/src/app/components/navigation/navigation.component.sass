@@ -1,0 +1,41 @@
+.sidenav-container
+  height: 100%
+
+.sidenav
+  width: 20rem
+  .mat-toolbar
+    background: inherit
+  &.d-none
+    display: none
+
+.content-wrapper
+  height: calc(100% - 7rem)
+
+.mat-toolbar
+  position: sticky
+  padding: 0 1rem
+  top: 0
+  z-index: 1
+  &.handset
+    padding: 0 1rem 0 0
+  mat-icon
+    margin-right: .75rem
+  .spacer
+    flex: 1 1 auto
+
+mat-sidenav-content
+  .ml-0
+    margin-left: 0
+
+mat-nav-list
+  display: flex
+  flex-direction: row
+  color: #ffffff
+  padding: 0 1rem 0 3rem
+
+\:host::ng-deep
+  .mat-list-base
+    .mat-list-item
+      color: inherit
+  .content-wrapper > *
+    height: 100%

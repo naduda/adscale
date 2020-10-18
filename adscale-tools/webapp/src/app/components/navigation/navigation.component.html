@@ -1,0 +1,52 @@
+<mat-sidenav-container class="sidenav-container" *ngIf="isHandset$ | async as isHandset">
+  <mat-sidenav #drawer
+               class="sidenav"
+               [class.d-none]="!isHandset.matches"
+               [fixedInViewport]="false"
+               [attr.role]="isHandset.matches ? 'dialog' : 'navigation'"
+               [mode]="isHandset.matches ? 'over' : 'side'"
+               [opened]="!isHandset.matches">
+    <ng-container *ngIf="isHandset.matches">
+      <mat-toolbar>Menu</mat-toolbar>
+
+      <ng-container *ngTemplateOutlet="navItems"></ng-container>
+    </ng-container>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary" [class.handset]="isHandset.matches">
+      <button type="button"
+              aria-label="Toggle sidenav"
+              mat-icon-button
+              (click)="drawer.toggle()"
+              *ngIf="isHandset.matches">
+        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+      </button>
+      <mat-icon>settings</mat-icon>
+      <span>AdScale</span>
+
+      <ng-container *ngIf="!isHandset.matches">
+        <ng-container *ngTemplateOutlet="navItems"></ng-container>
+      </ng-container>
+
+      <span class="flex-1" *ngIf="isHandset.matches"></span>
+      <div class="spacer"></div>
+      <div>
+        <mat-slide-toggle color="accent"
+                          [checked]="true"
+                          [disabled]="false">
+        </mat-slide-toggle>
+      </div>
+    </mat-toolbar>
+
+    <div class="content-wrapper">
+      <ng-content select=".content"></ng-content>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+<ng-template #navItems>
+  <mat-nav-list class="flex-1">
+    <ng-content select=".nav-items"></ng-content>
+  </mat-nav-list>
+</ng-template>

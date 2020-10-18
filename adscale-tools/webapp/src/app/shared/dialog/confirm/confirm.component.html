@@ -1,0 +1,21 @@
+<adscale-dialog [form]="form"
+                [closable]="false"
+                submitText="Yes"
+                [title]="data.title"
+                headerClass="text-center w-100"
+                footerClass="flex-row-reverse justify-content-start">
+
+  <div dialogBody
+       class="t_danger"
+       [innerHTML]="data.desc">
+  </div>
+
+  <ng-container dialogFooter>
+    <button class="reject-button"
+            mat-raised-button
+            (click)="reject()">
+      No
+    </button>
+  </ng-container>
+
+</adscale-dialog>

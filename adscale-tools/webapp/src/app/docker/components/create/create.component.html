@@ -1,0 +1,91 @@
+<div class="wrapper" *ngIf="state">
+  <div class="item">
+    <h3>Image</h3>
+    <button mat-raised-button
+            [color]="state.imageExists ? 'warn' : 'primary'"
+            [innerHTML]="state.imageExists ? 'Remove Docker Image' : 'Create Docker Image'"
+            (click)="createOrRemoveImage()">
+    </button>
+  </div>
+
+  <div class="item" *ngIf="state.imageExists">
+    <h3>Container</h3>
+
+    <div class="flex-center">
+      <ng-container *ngIf="!loading; else loader">
+        <button mat-raised-button
+                [color]="state.containerExists ? 'warn' : 'primary'"
+                [innerHTML]="state.containerExists ? 'Remove Docker Container' : 'Create Docker Container'"
+                (click)="createOrRemoveContainer()">
+        </button>
+
+        <mat-slide-toggle *ngIf="state.containerExists"
+                          class="toggle"
+                          color="primary"
+                          [checked]="state.containerRunning"
+                          (change)="toggleContainer($event.checked)">
+          {{ state.containerRunning ? 'Stop Container' : 'Start Container' }}
+        </mat-slide-toggle>
+      </ng-container>
+    </div>
+  </div>
+
+  <div class="item" *ngIf="state.containerRunning">
+    <h3>Backend</h3>
+
+    <div class="flex-center">
+      <ng-container *ngIf="!loading; else loader">
+
+        <button mat-raised-button
+                color="primary"
+                (click)="buildWar()">
+          Build War
+        </button>
+
+        <mat-checkbox class="toggle"
+                      color="primary"
+                      [(ngModel)]="installModule">
+          Install module:3
+        </mat-checkbox>
+
+        <mat-checkbox color="primary"
+                      [(ngModel)]="installCbfsms">
+          Install cbfsms
+        </mat-checkbox>
+
+      </ng-container>
+    </div>
+  </div>
+
+  <div class="item" *ngIf="state.containerRunning">
+    <h3>Frontend</h3>
+
+    <div class="flex-center">
+      <ng-container *ngIf="!loading; else loader">
+
+        <button mat-raised-button
+                color="primary"
+                (click)="updateFrontend(true)">
+          Update Dev
+        </button>
+
+        <button class="toggle"
+                mat-raised-button
+                color="primary"
+                (click)="updateFrontend(false)">
+          Update Prod
+        </button>
+
+        <mat-checkbox color="primary"
+                      [(ngModel)]="installNpm">
+          npm install
+        </mat-checkbox>
+
+      </ng-container>
+    </div>
+  </div>
+
+  <ng-template #loader>
+    Loading
+  </ng-template>
+</div>
