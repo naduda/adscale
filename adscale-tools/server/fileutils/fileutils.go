@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 func GetStructFromJsonFile(data interface{}, filename string) error {
@@ -27,4 +28,45 @@ func MakeDirIfNotExist(name string) error {
 		return os.Mkdir(name, os.ModePerm)
 	}
 	return nil
+}
+
+func RemoveLineInFile(filename string, line int) error {
+	input, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+
+	lines := strings.Split(string(input), "\n")
+
+	for i := range lines {
+		if line-1 == i {
+			lines[i] = ""
+		}
+	}
+
+	output := strings.Join(lines, "\n")
+	return ioutil.WriteFile(filename, []byte(output), 0644)
+}
+
+func ReplaceInFile(filename string, old string, text string) error {
+	if old == text {
+		return nil
+	}
+
+	input, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+
+	lines := strings.Split(string(input), "\n")
+
+	for i := range lines {
+		line := lines[i]
+		if strings.Contains(line, old) {
+			lines[i] = strings.Replace(line, old, text, -1)
+		}
+	}
+
+	output := strings.Join(lines, "\n")
+	return ioutil.WriteFile(filename, []byte(output), 0644)
 }

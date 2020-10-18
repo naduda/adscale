@@ -1,20 +1,36 @@
 package handlers
 
 import (
+	"adscale-tools/docker"
+	"adscale-tools/model"
 	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
-func GetHandlers(api string, disable bool) map[string]http.HandlerFunc {
-	handlers := map[string]http.HandlerFunc{}
+type Handlers struct {
+	Settings model.Settings
+	Docker   docker.AdscaleContainer
+}
 
-	handlers["/"] = http.FileServer(http.Dir("/webapp")).ServeHTTP
-	handlers[fmt.Sprintf("/%s/settings", api)] = settingsHandleFunc
+func (h *Handlers) GetHandlers(api string, disable bool) map[string]http.HandlerFunc {
+	handlers := map[string]http.HandlerFunc{
+		"/": http.FileServer(http.Dir("/webapp")).ServeHTTP,
+	}
+
 	handlers[fmt.Sprintf("/%s/file-path-autocomplete", api)] = filePathAutocompleteHandleFunc
-	handlers[fmt.Sprintf("/%s/properties", api)] = easyleadsPropertiesFunc
-	handlers[fmt.Sprintf("/%s/technologies", api)] = getTechnologies
-	handlers[fmt.Sprintf("/%s/prepare-docker-files", api)] = prepareDockerFiles
+	handlers[fmt.Sprintf("/%s/settings", api)] = h.settingsHandleFunc
+	handlers[fmt.Sprintf("/%s/properties", api)] = h.easyleadsPropertiesFunc
+	handlers[fmt.Sprintf("/%s/add-property", api)] = h.addPropertyFunc
+	handlers[fmt.Sprintf("/%s/remove-property", api)] = h.removePropertyFunc
+	handlers[fmt.Sprintf("/%s/copy-properties-to-container", api)] = copyPropertiesToContainerFunc
+	handlers[fmt.Sprintf("/%s/remove-extra-empty-lines", api)] = h.removeExtraEmptyLinesFunc
+	handlers[fmt.Sprintf("/%s/docker-state", api)] = h.dockerStateFunc
+	handlers[fmt.Sprintf("/%s/toggle-container", api)] = h.toggleContainerFunc
+	handlers[fmt.Sprintf("/%s/create-remove-container", api)] = h.createRemoveContainerFunc
+	handlers[fmt.Sprintf("/%s/create-remove-image", api)] = h.createRemoveImageFunc
+	handlers[fmt.Sprintf("/%s/build-war", api)] = buildWarFunc
+	handlers[fmt.Sprintf("/%s/update-frontend", api)] = h.updateFrontendFunc
 
 	if disable {
 		for k, hf := range handlers {
@@ -22,7 +38,6 @@ func GetHandlers(api string, disable bool) map[string]http.HandlerFunc {
 		}
 	}
 
-	fmt.Println(handlers)
 	return handlers
 }
 

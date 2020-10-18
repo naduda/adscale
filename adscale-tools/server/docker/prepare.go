@@ -10,7 +10,7 @@ import (
 )
 
 func PrepareEasyleadsConf() error {
-	if err := fileutils.MakeDirIfNotExist("./docker"); err != nil {
+	if err := fileutils.MakeDirIfNotExist("./" + model.DockerFolderConfig); err != nil {
 		return err
 	}
 
@@ -24,8 +24,11 @@ func PrepareEasyleadsConf() error {
 		return err
 	}
 
-	os.Remove(model.DockerEasyleadsConf)
-	file, err := os.OpenFile(model.DockerEasyleadsConf, os.O_RDONLY|os.O_CREATE, 0666)
+	if err := os.Remove(model.DockerEasyleadsConf); err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile(model.DockerEasyleadsConf, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		return err
 	}
@@ -33,9 +36,13 @@ func PrepareEasyleadsConf() error {
 
 	for k, v := range config.Props {
 		if isPath(v.Value) {
-			file.WriteString(fmt.Sprintf("%s=%s/%s\n", k, model.DockerDataFolder, k))
+			if _, err := file.WriteString(fmt.Sprintf("%s=%s/%s\n", k, model.DockerDataFolder, k)); err != nil {
+				return err
+			}
 		} else {
-			file.WriteString(fmt.Sprintf("%s=%s\n", k, v.Value))
+			if _, err := file.WriteString(fmt.Sprintf("%s=%s\n", k, v.Value)); err != nil {
+				return err
+			}
 		}
 	}
 

@@ -9,9 +9,10 @@ import (
 )
 
 type ConfigurationProperty struct {
-	Line   int    `json:"line"`
-	Value  string `json:"value"`
-	Status bool   `json:"status"`
+	Line    int    `json:"line"`
+	Value   string `json:"value"`
+	Status  bool   `json:"status"`
+	Enabled bool   `json:"enabled"`
 }
 
 type Config struct {
@@ -33,21 +34,30 @@ func (c *Config) Init(filename string) error {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line++
-		arr := strings.Split(scanner.Text(), "=")
+		text := strings.TrimSpace(scanner.Text())
+		arr := strings.Split(text, "=")
 		if len(arr) > 1 {
-			key := strings.TrimSpace(arr[0])
-			if strings.HasPrefix(key, "#") {
+			if strings.HasPrefix(text, "#") && !strings.Contains(text, "=") {
 				continue
 			}
+
+			key := strings.TrimSpace(arr[0])
 			value := strings.TrimSpace(arr[1])
-			c.Props[key] = &ConfigurationProperty{line, value, false}
+			enabled := !strings.HasPrefix(text, "#")
+			if !enabled {
+				key = strings.TrimSpace(key[1:])
+				if strings.Contains(key, " ") {
+					continue
+				}
+			}
+			c.Props[key] = &ConfigurationProperty{line, value, false, enabled}
 		}
 	}
 
 	return scanner.Err()
 }
 
-func (c Config) Format() error {
+func (c *Config) Format() error {
 	input, err := ioutil.ReadFile(c.Filename)
 	if err != nil {
 		log.Fatalln(err)
@@ -68,6 +78,9 @@ func (c Config) Format() error {
 		for prev == 0 {
 			lines[i] = "###"
 			i++
+			if i == len(lines) {
+				break
+			}
 			prev = len(strings.TrimSpace(lines[i]))
 		}
 	}

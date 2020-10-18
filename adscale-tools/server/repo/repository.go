@@ -10,8 +10,12 @@ import (
 )
 
 type Repository struct {
-	Filename string
+	Filename     string
+	Alternatives map[string]string
 }
+
+const Import = "com.adscale.core.ApplicationConfiguration"
+const ImportAll = "com.adscale.core.*"
 
 func (r *Repository) Init(filename string) error {
 	fullPath, err := filepath.Abs(filename)
@@ -20,6 +24,10 @@ func (r *Repository) Init(filename string) error {
 }
 
 func (r *Repository) CheckProperties(c *config.Config) error {
+	if err := r.setPropertyAlternatives(); err != nil {
+		return err
+	}
+
 	return filepath.Walk(r.Filename, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -30,17 +38,45 @@ func (r *Repository) CheckProperties(c *config.Config) error {
 		}
 
 		ext := strings.ToLower(filepath.Ext(path))
-		if ext != ".java" {
+		if ext != ".java" || strings.HasSuffix(path, "ApplicationConfiguration.java") {
 			return nil
 		}
-		checkFile(path, c)
+		go checkFile(path, c, r.Alternatives)
 		return nil
 	})
 }
 
-func checkFile(filename string, c *config.Config) {
+func (r *Repository) setPropertyAlternatives() error {
+	r.Alternatives = map[string]string{}
+
+	file, err := os.Open(r.Filename + "/base/src/main/java/com/adscale/core/ApplicationConfiguration.java")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		t := scanner.Text()
+		if strings.Contains(t, "static") && strings.Contains(t, "=") {
+			t = t[:len(t)-1]
+			t = strings.Replace(t, "public", "", -1)
+			t = strings.Replace(t, "final", "", -1)
+			t = strings.Replace(t, "static", "", -1)
+			t = strings.Replace(t, "String", "", -1)
+			split := strings.Split(t, "=")
+			key := strings.TrimSpace(split[0])
+			val := strings.TrimSpace(split[1])
+			val = strings.Replace(val, "\"", "", -1)
+			r.Alternatives[val] = key
+		}
+	}
+
+	return nil
+}
+
+func checkFile(filename string, c *config.Config, alternatives map[string]string) {
 	if c.IsChecked() {
-		fmt.Println("Done!")
 		return
 	}
 
@@ -51,14 +87,52 @@ func checkFile(filename string, c *config.Config) {
 	}
 	defer file.Close()
 
+	importBlock := true
+	hasProperties := false
+	fname := filename[strings.LastIndex(filename, "/")+1 : len(filename)-5]
+
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		t := scanner.Text()
+		if importBlock {
+			if strings.Contains(t, "package com.adscale.core;") {
+				hasProperties = true
+				continue
+			}
+			if strings.Contains(t, "class") && strings.Contains(t, fname) {
+				importBlock = false
+			}
+			if hasProperties {
+				continue
+			}
+			if strings.Contains(t, Import) || strings.Contains(t, ImportAll) {
+				hasProperties = true
+			}
+			continue
+		}
+
+		if !hasProperties {
+			continue
+		}
+
 		for k, v := range c.Props {
 			if v.Status {
 				continue
 			}
-			if strings.Contains(t, k) {
+			commented := strings.HasPrefix(strings.TrimSpace(t), "//")
+			if commented {
+				continue
+			}
+			if strings.Contains(t, fmt.Sprintf("\"%s\"", k)) {
+				v.Status = true
+				c.CheckedLength++
+				break
+			}
+			alternative, ok := alternatives[k]
+			if !ok {
+				continue
+			}
+			if strings.Contains(t, fmt.Sprintf("ApplicationConfiguration.%s", alternative)) {
 				v.Status = true
 				c.CheckedLength++
 				break
