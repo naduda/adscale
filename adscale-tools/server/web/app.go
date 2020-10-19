@@ -39,11 +39,11 @@ func NewApp(disableCors bool) App {
 	}
 }
 
-func (a *App) Serve(port string) error {
+func (a *App) Serve(port int) error {
 	for path, handler := range a.handlers {
 		http.Handle(path, handler)
 	}
 
-	log.Printf("Web server is available on port %s\n", port)
-	return http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
+	log.Printf("Web server is available on port %d\n", port)
+	return http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 }

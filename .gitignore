@@ -2,3 +2,4 @@ adscale-tools/server/.idea
 settings.json
 *.conf
 .DS_Store
+adscale-tools/server/server
