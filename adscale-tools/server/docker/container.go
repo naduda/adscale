@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -226,14 +227,20 @@ func CreateWar(mod3 bool, cbfsms bool, s model.Settings) error {
 -DgroupId=com.adscale -DartifactId=adscale_modules -Dversion=3.0 -Dpackaging=jar && \`
 	}
 
-	command += `mvn clean install -Dmaven.test.skip=true -f ./base/pom.xml && \
+	renameCommand := "mv ./ui/target/adscale_ui-3.0.war ./ui/target/ROOT.war"
+	if runtime.GOOS == "windows" {
+		renameCommand = fmt.Sprintf("ren %s/ui/target/adscale_ui-3.0.war %s/ui/target/ROOT.war", s.Repo, s.Repo)
+		renameCommand = strings.Replace(renameCommand, "/", "\\", -1)
+	}
+	command += fmt.Sprintf(`mvn clean install -Dmaven.test.skip=true -f ./base/pom.xml && \
 mvn clean install -Dmaven.test.skip=true -f ./ui/pom.xml && \
-mv ./ui/target/adscale_ui-3.0.war ./ui/target/ROOT.war && \
-docker cp ./ui/target/ROOT.war ` + model.DockerContainerName + `:/usr/local/tomcat/webapps/ROOT.war`
+%s && docker cp ./ui/target/ROOT.war %s:/usr/local/tomcat/webapps/ROOT.war`, renameCommand, model.DockerContainerName)
 
 	if err := RunCommand(command, s.Repo); err != nil {
+		fmt.Println(err)
 		return err
 	}
+	fmt.Println("war was updated inside container")
 
 	return fileutils.ReplaceInFile(contextXML, s.DbIP, url)
 }

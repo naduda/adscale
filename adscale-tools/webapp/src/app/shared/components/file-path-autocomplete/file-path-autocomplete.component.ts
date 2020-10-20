@@ -21,11 +21,6 @@ export interface IPath {
   styleUrls: ['./file-path-autocomplete.component.sass'],
   providers: [
     { provide: MatFormFieldControl, useExisting: FilePathAutocompleteComponent },
-    // {
-    //   provide: NG_VALUE_ACCESSOR,
-    //   useExisting: forwardRef(() => FilePathAutocompleteComponent),
-    //   multi: true,
-    // }
   ],
 })
 export class FilePathAutocompleteComponent extends AValueAccessor implements MatFormFieldControl<string>, OnInit, OnDestroy {
