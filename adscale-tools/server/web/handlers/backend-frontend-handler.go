@@ -41,13 +41,14 @@ func (h *Handlers) updateFrontendFunc(w http.ResponseWriter, r *http.Request) {
 
 	npmCmd := ""
 	if installNpm {
-		npmCmd = "npm install &&"
+		npmCmd = "npm install && "
 	}
-	ng := fmt.Sprintf("%s/node_modules/@angular/cli/bin/ng", h.Settings.UiFolder)
-	cmd := fmt.Sprintf("%s %s build --base-href \"/%s/\"", npmCmd, ng, folderName)
-	if !isDev {
-		cmd += " --prod"
+
+	ngCommand := "build"
+	if isDev {
+		ngCommand = "build-dev"
 	}
+	cmd := fmt.Sprintf("%snpm run %s --prefix %s", npmCmd, ngCommand, h.Settings.UiFolder)
 
 	cmd += fmt.Sprintf(" && docker exec %s rm -rf /usr/local/tomcat/webapps/ROOT/%s", model.DockerContainerName, folderName)
 

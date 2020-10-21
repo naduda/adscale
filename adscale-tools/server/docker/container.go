@@ -227,14 +227,22 @@ func CreateWar(mod3 bool, cbfsms bool, s model.Settings) error {
 -DgroupId=com.adscale -DartifactId=adscale_modules -Dversion=3.0 -Dpackaging=jar && \`
 	}
 
-	renameCommand := "mv ./ui/target/adscale_ui-3.0.war ./ui/target/ROOT.war"
+	renameCommand := fmt.Sprintf("mv %s/ui/target/adscale_ui-3.0.war %s/ui/target/ROOT.war",
+		s.Repo, s.Repo)
 	if runtime.GOOS == "windows" {
-		renameCommand = fmt.Sprintf("ren %s/ui/target/adscale_ui-3.0.war %s/ui/target/ROOT.war", s.Repo, s.Repo)
+		renameCommand = fmt.Sprintf("ren %s/ui/target/adscale_ui-3.0.war ROOT.war", s.Repo)
 		renameCommand = strings.Replace(renameCommand, "/", "\\", -1)
 	}
-	command += fmt.Sprintf(`mvn clean install -Dmaven.test.skip=true -f ./base/pom.xml && \
-mvn clean install -Dmaven.test.skip=true -f ./ui/pom.xml && \
-%s && docker cp ./ui/target/ROOT.war %s:/usr/local/tomcat/webapps/ROOT.war`, renameCommand, model.DockerContainerName)
+	command += fmt.Sprintf(`mvn clean install -Dmaven.test.skip=true -f %s/base/pom.xml && \
+mvn clean install -Dmaven.test.skip=true -f %s/ui/pom.xml`, s.Repo, s.Repo)
+
+	command += fmt.Sprintf(` && \
+%s && docker cp %s/ui/target/ROOT.war %s:/usr/local/tomcat/webapps/ROOT.war`,
+		renameCommand, s.Repo, model.DockerContainerName)
+
+	if runtime.GOOS == "windows" {
+		command = strings.Replace(command, "\\\n", "", -1)
+	}
 
 	if err := RunCommand(command, s.Repo); err != nil {
 		fmt.Println(err)

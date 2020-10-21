@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -88,7 +89,11 @@ func checkFile(filepath string, c *config.Config, alternatives map[string]string
 
 	importBlock := true
 	hasProperties := false
-	fname := filepath[strings.LastIndex(filepath, "/")+1 : len(filepath)-5]
+	pathSeparator := "/"
+	if runtime.GOOS == "windows" {
+		pathSeparator = "\\"
+	}
+	fname := filepath[strings.LastIndex(filepath, pathSeparator)+1 : len(filepath)-5]
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -101,7 +106,8 @@ func checkFile(filepath string, c *config.Config, alternatives map[string]string
 
 		if importBlock {
 			if !hasProperties {
-				if strings.Contains(t, "package com.adscale.core;") {
+				if strings.Contains(t, "package com.adscale.core;") ||
+					strings.Contains(t, "import com.adscale.core.*;") {
 					hasProperties = true
 					continue
 				}
