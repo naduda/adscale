@@ -98,7 +98,7 @@ func (c *AdscaleContainer) RemoveImage() error {
 }
 
 func isImageExists() (bool, error) {
-	res, err := executeCommand("docker images --format \"{{.Repository}}\"")
+	res, err := executeCommand("docker images --format {{.Repository}}")
 	if err != nil {
 		return false, err
 	}
@@ -112,7 +112,7 @@ func isImageExists() (bool, error) {
 }
 
 func isContainerExists() (bool, error) {
-	res, err := executeCommand("docker ps -a --format \"{{.Names}}\"")
+	res, err := executeCommand("docker ps -a --format {{.Names}}")
 	if err != nil {
 		return false, err
 	}
@@ -126,7 +126,7 @@ func isContainerExists() (bool, error) {
 }
 
 func isContainerRunning() (bool, error) {
-	res, err := executeCommand("docker ps --format \"{{.Names}}\"")
+	res, err := executeCommand("docker ps --format {{.Names}}")
 	if err != nil {
 		return false, err
 	}
