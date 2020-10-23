@@ -1,9 +1,9 @@
 import { BreakpointObserver, Breakpoints, BreakpointState } from '@angular/cdk/layout';
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Observable } from 'rxjs';
-import { catchError, shareReplay } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { catchError, shareReplay, takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -11,9 +11,11 @@ import { environment } from 'src/environments/environment';
   templateUrl: './navigation.component.html',
   styleUrls: ['./navigation.component.sass']
 })
-export class NavigationComponent {
+export class NavigationComponent implements OnDestroy {
 
   isHandset$: Observable<BreakpointState>;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     breakpointObserver: BreakpointObserver,
@@ -21,7 +23,16 @@ export class NavigationComponent {
     private snackBar: MatSnackBar,
   ) {
     this.isHandset$ = breakpointObserver.observe(Breakpoints.HandsetPortrait)
-      .pipe(shareReplay());
+      .pipe(
+        takeUntil(this.destroy$),
+        shareReplay(),
+      );
+    breakpointObserver.ngOnDestroy()
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   powerOff() {
