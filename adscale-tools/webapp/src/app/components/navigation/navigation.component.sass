@@ -20,6 +20,8 @@
     padding: 0 1rem 0 0
   mat-icon
     margin-right: .75rem
+    &:hover
+      cursor: pointer
   .spacer
     flex: 1 1 auto
 
@@ -32,6 +34,19 @@ mat-nav-list
   flex-direction: row
   color: #ffffff
   padding: 0 1rem 0 3rem
+  &.small
+    flex-direction: column
+    padding: 0
+
+.small
+  background-color: #673ab7
+  color: #ffffff
+  mat-toolbar
+    color: #ffffff
+    border-bottom: 1px solid #ffffff
+    padding-left: 1.75rem
+    margin-bottom: 1.75rem
+
 
 \:host::ng-deep
   .mat-list-base

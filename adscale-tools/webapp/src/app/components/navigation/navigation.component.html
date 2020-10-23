@@ -2,6 +2,7 @@
   <mat-sidenav #drawer
                class="sidenav"
                [class.d-none]="!isHandset.matches"
+               [class.small]="isHandset"
                [fixedInViewport]="false"
                [attr.role]="isHandset.matches ? 'dialog' : 'navigation'"
                [mode]="isHandset.matches ? 'over' : 'side'"
@@ -20,7 +21,7 @@
               mat-icon-button
               (click)="drawer.toggle()"
               *ngIf="isHandset.matches">
-        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+        <mat-icon>menu</mat-icon>
       </button>
       <mat-icon>settings</mat-icon>
       <span>AdScale</span>
@@ -32,10 +33,7 @@
       <span class="flex-1" *ngIf="isHandset.matches"></span>
       <div class="spacer"></div>
       <div>
-        <mat-slide-toggle color="accent"
-                          [checked]="true"
-                          [disabled]="false">
-        </mat-slide-toggle>
+        <mat-icon (click)="powerOff()">power_settings_new</mat-icon>
       </div>
     </mat-toolbar>
 
@@ -43,10 +41,10 @@
       <ng-content select=".content"></ng-content>
     </div>
   </mat-sidenav-content>
-</mat-sidenav-container>
 
-<ng-template #navItems>
-  <mat-nav-list class="flex-1">
-    <ng-content select=".nav-items"></ng-content>
-  </mat-nav-list>
-</ng-template>
+  <ng-template #navItems>
+    <mat-nav-list class="flex-1" [class.small]="isHandset">
+      <ng-content select=".nav-items"></ng-content>
+    </mat-nav-list>
+  </ng-template>
+</mat-sidenav-container>

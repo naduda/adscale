@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"time"
 )
 
 type Handlers struct {
@@ -31,6 +33,11 @@ func (h *Handlers) GetHandlers(api string, disable bool) map[string]http.Handler
 	handlers[fmt.Sprintf("/%s/create-remove-image", api)] = h.createRemoveImageFunc
 	handlers[fmt.Sprintf("/%s/build-war", api)] = h.buildWarFunc
 	handlers[fmt.Sprintf("/%s/update-frontend", api)] = h.updateFrontendFunc
+
+	handlers[fmt.Sprintf("/%s/off", api)] = func (w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		time.AfterFunc(1*time.Second, func () {os.Exit(0)})
+	}
 
 	if disable {
 		for k, hf := range handlers {
